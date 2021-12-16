@@ -11,16 +11,20 @@ RE_TASK = re.compile(r'^#+ (.+)')
 RE_TIME = re.compile(r'^TIME: (.+)', re.I)
 RE_HOURS = re.compile(r'(\d+) ?([ywdh]{1})', 
                       re.I)
+HOURS_PER_HOUR = 1
+HOURS_PER_DAY  = 8
+HOURS_PER_WEEK = 40
+HOURS_PER_YEAR = 52 * HOURS_PER_WEEK
 
 UNITS = {
-        'h': 1,
-        'H': 1,
-        'd': 8,
-        'D': 8,
-        'w': 40,
-        'W': 40,
-        'y': 52*40,
-        'Y': 52*40,
+        'h': HOURS_PER_HOUR,
+        'H': HOURS_PER_HOUR,
+        'd': HOURS_PER_DAY,
+        'D': HOURS_PER_DAY,
+        'w': HOURS_PER_WEEK,
+        'W': HOURS_PER_WEEK,
+        'y': HOURS_PER_YEAR,
+        'Y': HOURS_PER_YEAR,
         }
 
 class TimeResult(dict):
@@ -70,5 +74,38 @@ def str_to_hours(value):
         unit = m.group(2)
 
         total += float(value) * UNITS[unit]
-
     return total
+
+def hours_to_str(value):
+    '''Convert the input float hours into a 
+    string.
+
+    Args:
+        valur (float): Number of hours
+
+    Returns:
+        String
+    '''
+    output = []
+
+    if value >= HOURS_PER_YEAR:
+        years = value // HOURS_PER_YEAR
+        value -= years * HOURS_PER_YEAR
+        output.append(f"{years} y")
+
+    if value >= HOURS_PER_WEEK:
+        weeks = value // HOURS_PER_WEEK
+        value -= weeks * HOURS_PER_WEEK
+        output.append(f"{weeks} w")
+
+    if value >= HOURS_PER_DAY:
+        days = value // HOURS_PER_DAY
+        value -= days * HOURS_PER_DAY
+        output.append(f"{days} d")
+
+    if value >= HOURS_PER_HOUR:
+        hours = value // HOURS_PER_HOUR
+        value -= hours * HOURS_PER_HOUR
+        output.append(f"{hours} h")
+
+    return ' '.join(output)
