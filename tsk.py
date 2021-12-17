@@ -32,30 +32,31 @@ class TimeResult(dict):
         super().__init__(*args, **kwargs)
         self.__dict__ = self
 
-def parse(path):
+def parse(*paths):
     ''' Parse the provided file, find task /
     time and return information.
 
     Args:
-        path (str): path to file
+        *paths (str): path to files
 
     Returns:
         Dictionary of Tasks: {time: X}
     '''
     tasks = TimeResult()
-    with open(path, 'r') as plan:
-        name = None
-        for line in plan:
-            task_match = RE_TASK.match(line)
-            if task_match:
-                name = task_match.group(1)
+    for path in paths:
+        with open(path, 'r') as plan:
+            name = None
+            for line in plan:
+                task_match = RE_TASK.match(line)
+                if task_match:
+                    name = task_match.group(1)
 
-            time_match = RE_TIME.match(line)
-            if time_match:
-                estimate = time_match.group(1)
-                if name not in tasks:
-                    tasks[name] = TimeResult()
-                tasks[name].time = estimate
+                time_match = RE_TIME.match(line)
+                if time_match:
+                    estimate = time_match.group(1)
+                    if name not in tasks:
+                        tasks[name] = TimeResult()
+                    tasks[name].time = str_to_hours(estimate)
 
     return tasks
 
@@ -91,21 +92,45 @@ def hours_to_str(value):
     if value >= HOURS_PER_YEAR:
         years = value // HOURS_PER_YEAR
         value -= years * HOURS_PER_YEAR
-        output.append(f"{years} y")
+        output.append(f"{int(years)} y")
 
     if value >= HOURS_PER_WEEK:
         weeks = value // HOURS_PER_WEEK
         value -= weeks * HOURS_PER_WEEK
-        output.append(f"{weeks} w")
+        output.append(f"{int(weeks)} w")
 
     if value >= HOURS_PER_DAY:
         days = value // HOURS_PER_DAY
         value -= days * HOURS_PER_DAY
-        output.append(f"{days} d")
+        output.append(f"{int(days)} d")
 
     if value >= HOURS_PER_HOUR:
         hours = value // HOURS_PER_HOUR
         value -= hours * HOURS_PER_HOUR
-        output.append(f"{hours} h")
+        output.append(f"{int(hours)} h")
 
     return ' '.join(output)
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser("tsk - Simple time estimate")
+    parser.add_argument('paths', help="path to the markdown file", nargs="+")
+    parser.add_argument('--list', help="list the task and times", action='store_true')
+
+    args = parser.parse_args()
+    result = parse(*args.paths)
+
+    total = 0
+    summary = []
+    for i, (k, v) in enumerate(result.items(), 1):
+        summary.append(f'{i}. {k} ({hours_to_str(v.time)})')
+        total += v.time
+
+    print(f"Time: {hours_to_str(total)}")
+    if args.list:
+        print("---")
+        for i in summary:
+            print(i)
+
+if __name__ == '__main__':
+    main()
