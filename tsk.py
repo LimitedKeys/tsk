@@ -1,5 +1,14 @@
 #!/usr/bin/python
+
 ''' tsk: Simple Time Estimate
+
+``` bash
+> cat plan.md
+# A
+## A.1
+Time: 2h
+## A.2
+Time: 24h
 
 > tsk plan.md
 Time: 1d 2h
