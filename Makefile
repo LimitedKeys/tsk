@@ -1,4 +1,7 @@
 
+VERSION := 1.0.0
+ARCHIVE := tsk-$(VERSION).zip
+
 .PHONY: all pdb
 
 all:
@@ -6,3 +9,8 @@ all:
 
 pdb:
 	python -m pytest ./tests --pdb
+
+save: archive/$(ARCHIVE)
+
+archive/$(ARCHIVE):
+	git archive -o archive/$(ARCHIVE) HEAD
