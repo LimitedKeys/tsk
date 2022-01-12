@@ -15,6 +15,8 @@ Time: 1d 2h
 '''
 
 import re
+import glob
+import argparse
 
 RE_TASK = re.compile(r'^#+ (.+)')
 RE_TIME = re.compile(r'^TIME: (.+)', re.I)
@@ -121,13 +123,13 @@ def hours_to_str(value):
     return ' '.join(output)
 
 def main():
-    import argparse
     parser = argparse.ArgumentParser("tsk - Simple time estimate")
-    parser.add_argument('paths', help="path to the markdown file", nargs="+")
+    parser.add_argument('path', help="path to the markdown file (glob ok)")
     parser.add_argument('--list', help="list the task and times", action='store_true')
 
     args = parser.parse_args()
-    result = parse(*args.paths)
+    paths = glob.glob(args.path)
+    result = parse(*paths)
 
     total = 0
     summary = []
