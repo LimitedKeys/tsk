@@ -7,7 +7,9 @@ def test_parse_plan_a(plan_a):
     result = tsk.parse(plan_a)
 
     assert result.A.time == 12
+    assert result.A.tag  == "one"
     assert result.B.time == 16
+    assert result.B.tag  == "two"
 
 TIME = [
     ('1H',   1),

@@ -9,9 +9,11 @@ def plan_a(tmpdir):
             '',
             '## A',
             'Time: 12 h',
+            'Tag: one',
             '',
             '## B',
             'Time: 16 h',
+            'Tag: two',
             '',
             ]))
     return path

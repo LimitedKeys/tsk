@@ -2,7 +2,7 @@
 
 Quickly estimate time using markdown:
 
-~~~
+``` bash
 > cat plan.md
 # Project
 
@@ -16,7 +16,7 @@ Time: 23 h
 
 > tsk plad.md
 Time: 3w 3h
-~~~
+```
 
 ## Details
 

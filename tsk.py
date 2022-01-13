@@ -19,7 +19,10 @@ import glob
 import argparse
 
 RE_TASK = re.compile(r'^#+ (.+)')
+
 RE_TIME = re.compile(r'^TIME: (.+)', re.I)
+RE_TAG = re.compile(r'^TAG: (.+)', re.I)
+
 RE_HOURS = re.compile(r'(\d+) ?([ywdh]{1})', 
                       re.I)
 HOURS_PER_HOUR = 1
@@ -68,6 +71,13 @@ def parse(*paths):
                     if name not in tasks:
                         tasks[name] = TimeResult()
                     tasks[name].time = str_to_hours(estimate)
+
+                tag_match = RE_TAG.match(line)
+                if tag_match:
+                    estimate = tag_match.group(1)
+                    if name not in tasks:
+                        tasks[name] = TimeResult()
+                    tasks[name].tag = estimate.strip()
 
     return tasks
 
@@ -126,6 +136,7 @@ def main():
     parser = argparse.ArgumentParser("tsk - Simple time estimate")
     parser.add_argument('path', help="path to the markdown file (glob ok)")
     parser.add_argument('--list', help="list the task and times", action='store_true')
+    parser.add_argument('--tag', help="only show items from selected tag", default="", type=str)
 
     args = parser.parse_args()
     paths = glob.glob(args.path)
@@ -134,6 +145,12 @@ def main():
     total = 0
     summary = []
     for i, (k, v) in enumerate(result.items(), 1):
+        if args.tag:
+            if "tag" not in v:
+                continue
+            if args.tag not in v.tag:
+                continue
+
         summary.append(f'{i}. {k} ({hours_to_str(v.time)})')
         total += v.time
 

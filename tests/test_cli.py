@@ -17,11 +17,22 @@ EXAMPLES = [
         b"Time: 1 w 2 d 2 h"),
     (os.path.join(EXAMPLE_PATH, "plan_b.md"), 
         b"Time: 1 y 6 w 2 d 6 h"),
+    (os.path.join(EXAMPLE_PATH, "plan_c.md"), 
+        b"Time: 3 h"),
 ]
 
-def run(some_file):
+TAG_EX = [
+    (os.path.join(EXAMPLE_PATH, "plan_c.md"), 
+        "test",
+        b"Time: 1 h"),
+]
+
+def run(some_file, tag=None):
+    command = f"python {TSK_PATH} {some_file}"
+    if tag:
+        command = command + f" --tag {tag}"
     out = subprocess.run(
-            [f"python {TSK_PATH} {some_file}"],
+            [command],
             shell=True,
             check=True,
             capture_output=True,
@@ -29,6 +40,11 @@ def run(some_file):
     return out.stdout.strip()
 
 @pytest.mark.parametrize("path,expected", EXAMPLES)
-def test_cli_plan_a(path, expected):
+def test_cli(path, expected):
     actual = run(path)
+    assert actual == expected
+
+@pytest.mark.parametrize("path,tag,expected", TAG_EX)
+def test_cli_tag(path, tag, expected):
+    actual = run(path, tag=tag)
     assert actual == expected
