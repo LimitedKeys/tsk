@@ -136,6 +136,7 @@ def main():
     parser = argparse.ArgumentParser("tsk - Simple time estimate")
     parser.add_argument('path', help="path to the markdown file (glob ok)")
     parser.add_argument('--list', help="list the task and times", action='store_true')
+    parser.add_argument('--csv', help="output as csv format", action='store_true')
     parser.add_argument('--tag', help="only show items from selected tag", default="", type=str)
 
     args = parser.parse_args()
@@ -144,21 +145,40 @@ def main():
 
     total = 0
     summary = []
-    for i, (k, v) in enumerate(result.items(), 1):
+    for (k, v) in result.items():
         if args.tag:
             if "tag" not in v:
                 continue
             if args.tag not in v.tag:
                 continue
 
-        summary.append(f'{i}. {k} ({hours_to_str(v.time)})')
+        if "tag" in v:
+            summary.append(
+                (v.tag, k, hours_to_str(v.time))
+                )
+        else:
+            summary.append(
+                ('', k, hours_to_str(v.time))
+                )
         total += v.time
 
+    summary.sort()
+    if args.csv:
+        print("Tag, Name, Hours,")
+        for tag, name, hours in summary:
+            print(f'"{tag}", "{name}", "{hours}",')
+        return
+
     print(f"Time: {hours_to_str(total)}")
+
     if args.list:
         print("---")
-        for i in summary:
-            print(i)
+        for i, (tag, name, hours) in enumerate(summary, 1):
+            if tag:
+                print(f'{i}. <{tag}> {name}: {hours}')
+            else:
+                print(f'{i}. {name}: {hours}')
+
 
 if __name__ == '__main__':
     main()
