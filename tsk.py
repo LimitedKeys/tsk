@@ -154,11 +154,11 @@ def main():
 
         if "tag" in v:
             summary.append(
-                (v.tag, k, hours_to_str(v.time))
+                (v.tag, k, v.time)
                 )
         else:
             summary.append(
-                ('', k, hours_to_str(v.time))
+                ('', k, v.time)
                 )
         total += v.time
 
@@ -175,9 +175,9 @@ def main():
         print("---")
         for i, (tag, name, hours) in enumerate(summary, 1):
             if tag:
-                print(f'{i}. <{tag}> {name}: {hours}')
+                print(f'{i}. <{tag}> {name}: {hours_to_str(hours)}')
             else:
-                print(f'{i}. {name}: {hours}')
+                print(f'{i}. {name}: {hours_to_str(hours)}')
 
 
 if __name__ == '__main__':
