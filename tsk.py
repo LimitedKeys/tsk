@@ -166,7 +166,7 @@ def main():
     if args.csv:
         print("Tag, Name, Hours,")
         for tag, name, hours in summary:
-            print(f'"{tag}", "{name}", "{hours}",')
+            print(f'"{tag}", "{name}", {hours},')
         return
 
     print(f"Time: {hours_to_str(total)}")
