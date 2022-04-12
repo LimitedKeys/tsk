@@ -1,5 +1,6 @@
 
 import os
+import sys
 import subprocess
 
 import pytest
@@ -28,12 +29,17 @@ TAG_EX = [
 ]
 
 def run(some_file, tag=None):
-    command = f"python {TSK_PATH} {some_file}"
+    command = [
+        f"{sys.executable}",
+        f"{TSK_PATH}",
+        f"{some_file}",
+    ]
     if tag:
-        command = command + f" --tag {tag}"
+        command.append("--tag")
+        command.append(f"{tag}")
+
     out = subprocess.run(
-            [command],
-            shell=True,
+            command,
             check=True,
             capture_output=True,
         )

@@ -21,7 +21,7 @@ import argparse
 RE_TASK = re.compile(r'^#+ (.+)')
 
 RE_TIME = re.compile(r'^TIME: (.+)', re.I)
-RE_TAG = re.compile(r'^TAG: (.+)', re.I)
+RE_TAG = re.compile(r'^TAGS?: (.+)', re.I)
 
 RE_HOURS = re.compile(r'(\d+) ?([ywdh]{1})', 
                       re.I)
