@@ -23,8 +23,7 @@ RE_TASK = re.compile(r'^#+ (.+)')
 RE_TIME = re.compile(r'^TIME: (.+)', re.I)
 RE_TAG = re.compile(r'^TAGS?: (.+)', re.I)
 
-RE_HOURS = re.compile(r'(\d+) ?([ywdh]{1})', 
-                      re.I)
+RE_HOURS = re.compile(r'([0-9\.]+) ?([ywdh]{1})', re.I)
 HOURS_PER_HOUR = 1
 HOURS_PER_DAY  = 8
 HOURS_PER_WEEK = 40
@@ -71,6 +70,7 @@ def parse(*paths):
                     if name not in tasks:
                         tasks[name] = TimeResult()
                     tasks[name].time = str_to_hours(estimate)
+                    tasks[name].path = path
 
                 tag_match = RE_TAG.match(line)
                 if tag_match:
@@ -78,6 +78,7 @@ def parse(*paths):
                     if name not in tasks:
                         tasks[name] = TimeResult()
                     tasks[name].tag = estimate.strip()
+                    tasks[name].path = path
 
     return tasks
 
@@ -99,7 +100,7 @@ def str_to_hours(value):
     return total
 
 def hours_to_str(value):
-    '''Convert the input float hours into a 
+    '''Convert the input float hours into a
     string.
 
     Args:
@@ -128,7 +129,16 @@ def hours_to_str(value):
     if value >= HOURS_PER_HOUR:
         hours = value // HOURS_PER_HOUR
         value -= hours * HOURS_PER_HOUR
-        output.append(f"{int(hours)} h")
+
+        if value > 0:
+            output.append("{:.1f} h".format(hours + value))
+            value = 0
+        else:
+            output.append(f"{int(hours)} h")
+
+    if value > 0:
+        output.append("{:.1f} h".format(value))
+        value = 0
 
     return ' '.join(output)
 
@@ -153,31 +163,30 @@ def main():
                 continue
 
         if "tag" in v:
-            summary.append(
-                (v.tag, k, v.time)
-                )
+            if 'time' not in v:
+                v.time = 0
+
+            summary.append((v.path, v.tag, k, v.time))
         else:
-            summary.append(
-                ('', k, v.time)
-                )
+            summary.append((v.path, '', k, v.time))
         total += v.time
 
     summary.sort()
     if args.csv:
-        print("Tag, Name, Hours,")
-        for tag, name, hours in summary:
-            print(f'"{tag}", "{name}", {hours},')
+        print("Path, Tag, Name, Hours,")
+        for path, tag, name, hours in summary:
+            print(f'"{path}", "{tag}", "{name}", {hours},')
         return
 
     print(f"Time: {hours_to_str(total)}")
 
     if args.list:
         print("---")
-        for i, (tag, name, hours) in enumerate(summary, 1):
+        for i, (path, tag, name, hours) in enumerate(summary, 1):
             if tag:
-                print(f'{i}. <{tag}> {name}: {hours_to_str(hours)}')
+                print(f'{i}. {path} <{tag}> {name}: {hours_to_str(hours)}')
             else:
-                print(f'{i}. {name}: {hours_to_str(hours)}')
+                print(f'{i}. {path} {name}: {hours_to_str(hours)}')
 
 
 if __name__ == '__main__':

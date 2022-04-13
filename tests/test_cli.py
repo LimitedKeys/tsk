@@ -10,20 +10,20 @@ ROOT_PATH = os.path.abspath(
         os.path.join(PATH_HERE, ".."))
 EXAMPLE_PATH = os.path.join(ROOT_PATH,
         "example")
-TSK_PATH = os.path.join(ROOT_PATH, 
+TSK_PATH = os.path.join(ROOT_PATH,
         "tsk.py")
 
 EXAMPLES = [
-    (os.path.join(EXAMPLE_PATH, "plan_a.md"), 
+    (os.path.join(EXAMPLE_PATH, "plan_a.md"),
         b"Time: 1 w 2 d 2 h"),
-    (os.path.join(EXAMPLE_PATH, "plan_b.md"), 
+    (os.path.join(EXAMPLE_PATH, "plan_b.md"),
         b"Time: 1 y 6 w 2 d 6 h"),
-    (os.path.join(EXAMPLE_PATH, "plan_c.md"), 
+    (os.path.join(EXAMPLE_PATH, "plan_c.md"),
         b"Time: 3 h"),
 ]
 
 TAG_EX = [
-    (os.path.join(EXAMPLE_PATH, "plan_c.md"), 
+    (os.path.join(EXAMPLE_PATH, "plan_c.md"),
         "test",
         b"Time: 1 h"),
 ]
@@ -35,7 +35,7 @@ def run(some_file, tag=None):
         f"{some_file}",
     ]
     if tag:
-        command.append("--tag")
+        command.append(f"--tag")
         command.append(f"{tag}")
 
     out = subprocess.run(
