@@ -53,32 +53,31 @@ def parse(*paths):
         *paths (str): path to files
 
     Returns:
-        Dictionary of Tasks: {time: X}
+        Dictionary of Tasks (path, name): {time: X}
     '''
     tasks = TimeResult()
     for path in paths:
         with open(path, 'r') as plan:
-            name = None
+            key = None
             for line in plan:
                 task_match = RE_TASK.match(line)
                 if task_match:
                     name = task_match.group(1)
+                    key = (path, name)
 
                 time_match = RE_TIME.match(line)
                 if time_match:
                     estimate = time_match.group(1)
-                    if name not in tasks:
-                        tasks[name] = TimeResult()
-                    tasks[name].time = str_to_hours(estimate)
-                    tasks[name].path = path
+                    if key not in tasks:
+                        tasks[key] = TimeResult()
+                    tasks[key].time = str_to_hours(estimate)
 
                 tag_match = RE_TAG.match(line)
                 if tag_match:
                     estimate = tag_match.group(1)
-                    if name not in tasks:
-                        tasks[name] = TimeResult()
-                    tasks[name].tag = estimate.strip()
-                    tasks[name].path = path
+                    if key not in tasks:
+                        tasks[key] = TimeResult()
+                    tasks[key].tag = estimate.strip()
 
     return tasks
 
@@ -142,6 +141,40 @@ def hours_to_str(value):
 
     return ' '.join(output)
 
+def summerize(result, tag=None):
+    ''' unroll the tsk parsed results.
+
+    Args:
+        result (dict): dictionary returned by 
+            parse.
+        tag (str): Tag to parse for total
+
+    Returns:
+        Tuple (total hours, summary). summary is
+        a list of tuples: 
+            (path, tag, name, hours)
+    '''
+    total = 0
+    summary = []
+    for (k, v) in result.items():
+        path, name = k
+        if tag:
+            if "tag" not in v:
+                continue
+            if tag not in v.tag:
+                continue
+
+        if "tag" in v:
+            if 'time' not in v:
+                v.time = 0
+
+            summary.append((path, v.tag, name, v.time))
+        else:
+            summary.append((path, '', name, v.time))
+        total += v.time
+    summary.sort()
+    return (total, summary)
+
 def main():
     parser = argparse.ArgumentParser("tsk - Simple time estimate")
     parser.add_argument('path', help="path to the markdown file (glob ok)")
@@ -153,25 +186,10 @@ def main():
     paths = glob.glob(args.path)
     result = parse(*paths)
 
-    total = 0
-    summary = []
-    for (k, v) in result.items():
-        if args.tag:
-            if "tag" not in v:
-                continue
-            if args.tag not in v.tag:
-                continue
+    # summarize
+    total, summary = summerize(result, tag=args.tag)
 
-        if "tag" in v:
-            if 'time' not in v:
-                v.time = 0
-
-            summary.append((v.path, v.tag, k, v.time))
-        else:
-            summary.append((v.path, '', k, v.time))
-        total += v.time
-
-    summary.sort()
+    # csv print
     if args.csv:
         print("Path, Tag, Name, Hours,")
         for path, tag, name, hours in summary:
@@ -180,6 +198,7 @@ def main():
 
     print(f"Time: {hours_to_str(total)}")
 
+    # list print
     if args.list:
         print("---")
         for i, (path, tag, name, hours) in enumerate(summary, 1):
@@ -187,7 +206,6 @@ def main():
                 print(f'{i}. {path} <{tag}> {name}: {hours_to_str(hours)}')
             else:
                 print(f'{i}. {path} {name}: {hours_to_str(hours)}')
-
 
 if __name__ == '__main__':
     main()
