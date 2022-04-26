@@ -6,10 +6,11 @@ import tsk
 def test_parse_plan_a(plan_a):
     result = tsk.parse(plan_a)
 
-    assert result.A.time == 12
-    assert result.A.tag  == "one"
-    assert result.B.time == 16
-    assert result.B.tag  == "two"
+    assert result[(plan_a, 'A')].time == 12
+    assert result[(plan_a, 'A')].tag == "one"
+
+    assert result[(plan_a, 'B')].time == 16
+    assert result[(plan_a, 'B')].tag == "two"
 
 TIME = [
     ('0.1 h', 0.1),
