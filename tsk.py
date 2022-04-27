@@ -16,6 +16,7 @@ Time: 1d 2h
 
 import re
 import glob
+import collections
 import argparse
 
 RE_TASK = re.compile(r'^#+ (.+)')
@@ -55,7 +56,7 @@ def parse(*paths):
     Returns:
         Dictionary of Tasks (path, name): {time: X}
     '''
-    tasks = TimeResult()
+    tasks = collections.defaultdict(dict)
     for path in paths:
         with open(path, 'r') as plan:
             key = None
@@ -66,18 +67,14 @@ def parse(*paths):
                     key = (path, name)
 
                 time_match = RE_TIME.match(line)
-                if time_match:
+                if time_match and key:
                     estimate = time_match.group(1)
-                    if key not in tasks:
-                        tasks[key] = TimeResult()
-                    tasks[key].time = str_to_hours(estimate)
+                    tasks[key]["time"] = str_to_hours(estimate)
 
                 tag_match = RE_TAG.match(line)
-                if tag_match:
+                if tag_match and key:
                     estimate = tag_match.group(1)
-                    if key not in tasks:
-                        tasks[key] = TimeResult()
-                    tasks[key].tag = estimate.strip()
+                    tasks[key]["tag"] = estimate.strip()
 
     return tasks
 
@@ -150,28 +147,35 @@ def summerize(result, tag=None):
         tag (str): Tag to parse for total
 
     Returns:
-        Tuple (total hours, summary). summary is
-        a list of tuples: 
+        Tuple (total, summary). 
+
+        total is a dict of tags. Total is in 
+        total["total"]:
+            {tag: (total, percent)}
+
+        summary is a list of tuples: 
             (path, tag, name, hours)
     '''
-    total = 0
+    total = collections.defaultdict(int)
     summary = []
     for (k, v) in result.items():
         path, name = k
         if tag:
             if "tag" not in v:
                 continue
-            if tag not in v.tag:
+            if tag not in v["tag"]:
                 continue
 
         if "tag" in v:
             if 'time' not in v:
-                v.time = 0
+                v["time"] = 0
 
-            summary.append((path, v.tag, name, v.time))
+            summary.append((path, v["tag"], name, v["time"]))
         else:
-            summary.append((path, '', name, v.time))
-        total += v.time
+            summary.append((path, '', name, v["time"]))
+        total["total"] += v["time"]
+        if tag and "tag" in v:
+            total[tag] += v["time"]
     summary.sort()
     return (total, summary)
 
@@ -196,7 +200,7 @@ def main():
             print(f'"{path}", "{tag}", "{name}", {hours},')
         return
 
-    print(f"Time: {hours_to_str(total)}")
+    print(f"Time: {hours_to_str(total['total'])}")
 
     # list print
     if args.list:
