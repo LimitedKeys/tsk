@@ -51,3 +51,4 @@ STR = [
 def test_hours_to_str(value, expected):
     actual = tsk.hours_to_str(value)
     assert actual == expected
+
