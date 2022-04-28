@@ -28,6 +28,12 @@ TAG_EX = [
     (os.path.join(EXAMPLE_PATH, "plan_c.md"),
         "test",
         b"Time: 1 h\ntest: 1 h (100.00 %)"),
+    (os.path.join(EXAMPLE_PATH, "plan_d.md"),
+        "x",
+        b'Time: 2 h\nx: 1 h (50.00 %)\nx, y: 1 h (50.00 %)'),
+    (os.path.join(EXAMPLE_PATH, "plan_d.md"),
+        "y",
+        b'Time: 2 h\ny: 1 h (50.00 %)\nx, y: 1 h (50.00 %)'),
 ]
 
 def run(some_file, tag=None):
