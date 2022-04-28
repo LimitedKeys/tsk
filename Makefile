@@ -1,5 +1,5 @@
 
-VERSION := 1.6.0
+VERSION := 1.7.0
 ARCHIVE := tsk-$(VERSION).zip
 
 .PHONY: all pdb

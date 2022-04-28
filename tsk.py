@@ -171,11 +171,10 @@ def summerize(result, tag=None):
                 v["time"] = 0
 
             summary.append((path, v["tag"], name, v["time"]))
+            total[v["tag"]] += v["time"]
         else:
             summary.append((path, '', name, v["time"]))
         total["total"] += v["time"]
-        if tag and "tag" in v:
-            total[tag] += v["time"]
     summary.sort()
     return (total, summary)
 
@@ -185,6 +184,7 @@ def main():
     parser.add_argument('--list', help="list the task and times", action='store_true')
     parser.add_argument('--csv', help="output as csv format", action='store_true')
     parser.add_argument('--tag', help="only show items from selected tag", default="", type=str)
+    parser.add_argument('--hours', help="use hours instead of y / w / d output", action="store_true")
 
     args = parser.parse_args()
     paths = glob.glob(args.path)
@@ -200,16 +200,25 @@ def main():
             print(f'"{path}", "{tag}", "{name}", {hours},')
         return
 
-    print(f"Time: {hours_to_str(total['total'])}")
+    convert = hours_to_str
+    if args.hours:
+        convert = lambda x: f'{x:.1f} h'
+
+    print(f"Time: {convert(total['total'])}")
+    total_hours = total.pop('total')
+    if total:
+        for tag, hours in total.items():
+            percent = hours / total_hours * 100
+            print(f"{tag}: {convert(hours)} ({percent:.2f} %)")
 
     # list print
     if args.list:
         print("---")
         for i, (path, tag, name, hours) in enumerate(summary, 1):
             if tag:
-                print(f'{i}. {path} <{tag}> {name}: {hours_to_str(hours)}')
+                print(f'{i}. {path} <{tag}> {name}: {convert(hours)}')
             else:
-                print(f'{i}. {path} {name}: {hours_to_str(hours)}')
+                print(f'{i}. {path} {name}: {convert(hours)}')
 
 if __name__ == '__main__':
     main()
