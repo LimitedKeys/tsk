@@ -3,4 +3,4 @@ build/
 archive/
 *.swp
 *.egg-info/
-pyenv/
+python-env/

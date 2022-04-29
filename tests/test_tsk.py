@@ -1,7 +1,10 @@
 
+import numpy as np
 import pytest
 
 import tsk
+
+import summary_configs
 
 def test_parse_plan_a(plan_a):
     result = tsk.parse(plan_a)
@@ -52,3 +55,20 @@ def test_hours_to_str(value, expected):
     actual = tsk.hours_to_str(value)
     assert actual == expected
 
+@pytest.mark.parametrize("expected_summary,expected_total,tag_in", summary_configs.CONFIGS)
+def test_summary(expected_total, expected_summary, tag_in):
+    summary_dict = {}
+    for (path, tag, name, time) in expected_summary:
+        summary_dict[(path, name)] = {
+            "tag":tag,
+            "time":time
+        }
+
+    total, summary = tsk.summerize(summary_dict, tag_in)
+
+    np.testing.assert_equal(total, expected_total)
+    if tag_in:
+        filtered_summary = [i for i in expected_summary if tag_in in i[1]]
+        np.testing.assert_equal(summary, filtered_summary)
+    else:
+        np.testing.assert_equal(summary, expected_summary)
